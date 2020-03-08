@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>excel</title>
+</head>
+<body>
+<div id="app">
+    <div style="margin-bottom: 20px"><span>税率：</span><input type="text" class="value"></div>
+    <div style="margin-bottom: 20px"><span>excel-sheet标签页数：</span><input type="text" class="value1"></div>
+    <div style="margin-bottom: 20px"><input type="file" id="file"/></div>
+    <button id="button">提交</button>
+
+    <table cellspacing="0" border="1" style="margin-top: 50px">
+        <tr>
+            <th style="width: 200px">凭证日期</th>
+            <th style="width: 200px">凭证编号</th>
+            <th style="width: 200px">凭证类型</th>
+            <th style="width: 200px">摘要</th>
+            <th style="width: 200px">科目名称</th>
+            <th style="width: 200px">科目编号</th>
+            <th style="width: 200px">借方金额</th>
+            <th style="width: 200px">贷方金额</th>
+        </tr>
+        <tbody id ='tbody'></tbody>
+   </table>
+    <div id="total" style="display: none">
+        <p>上面表格税率贷方总额： <span class="small"></span></p>
+        <p>应交税费税率贷方总额： <span class="big"></span></p>
+    </div>
+</div>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+    $(function () {
+        var formData = new FormData();
+        $("#file").change(function(){
+            formData.append('file', $('#file')[0].files[0]);
+        });
+        $('#button').on('click',() => {
+            let value = $('.value').val()  // 获取税率
+            let value1 = $('.value1').val() // excel-sheet标签页数
+            $.ajax({
+                url:`http://localhost:8001/api/person/excel/${value}/${value1}`,
+                dataType:"json",   //返回格式为json
+                async:true,//请求是否异步，默认为异步
+                data:formData,
+                contentType:false, //ajax2.0可以不用设置请求头，但是jq帮我们自动设置了，这样的话需要我们自己取消掉
+                type:"post",
+                processData:false, //取消格式化数据\
+                success:function(req){
+                    let html = ''
+                    req.data.data.forEach((value,index) => {
+                        let ttr = `<tr>
+                                <td>${value.data}</td>
+                                <td>${value.number}</td>
+                                <td>${value.name}</td>
+                                <td>${value.abstract}</td>
+                                <td>${value.subject_name}</td>
+                                <td>${value.subject_number}</td>
+                                <td>${value.debtor}</td>
+                                <td>${value.lender}</td>
+                                </tr>`
+                        html += ttr
+                    })
+                    $('#tbody').html(html);
+                    $('#total').css({display:'block'});
+                    $('.big').html(`${req.data.baseTotal}`);
+                    $('.small').html(`${req.data.secondTotal}`)
+
+                },
+                error:function(){}
+            });
+        })
+
+    })
+</script>
+</html>
