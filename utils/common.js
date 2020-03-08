@@ -41,7 +41,7 @@ export default class Common {
                     temp.push(array[j]);
                 }
             }
-            if(sum >= result - 0.5 && sum <= result + 0.5){
+            if(sum >= result - 0.04 && sum <= result + 0.04){
                 console.log(sum,111)
                 console.log(temp,111)
                 return temp
